@@ -155,6 +155,23 @@ t_stack     *rotate_ab(t_stack *p)
     return (tmp);
 }
 
+t_stack     *rev_rotate_ab(t_stack *p)
+{
+    t_stack *tmp;
+    t_stack *new;
+
+    tmp = p;
+    while (tmp->next)
+    {
+        tmp = tmp->next;
+    }
+    new = (t_stack*)malloc(sizeof(t_stack));
+    new->next = p;
+    new->val = tmp->val;
+    tmp = NULL;
+    return (new);
+}
+
 void       ft_push_ab(t_stack **a, t_stack **b)
 {
     t_stack *mem;
@@ -212,7 +229,7 @@ t_op    *pushswap(int size, t_stack *a, t_stack *b)
 
         while (j < size)
         {
-            if ((((a->val >> i) %2 ) && 1 ) == 1)
+            if (((a->val >> i) & 1 ) == 1)
             {
                 a = rotate_ab(a);
                 queue = addop(queue, "ra");
@@ -327,18 +344,24 @@ int     is_sorted(t_stack *a)
     return (1);
 }
 
-int is_max(t_stack *a)
+int is_max(t_stack *a, int *len)
 {   
     t_stack *tmp;
-
+    int c;
     int max;
+
     max = a->val;
     tmp = a;
+    c = 0;
     while (tmp->next)
     {
         if (tmp && tmp->val > max)
+        {
             max = tmp->val;
+            *len = c;
+        }
         tmp = tmp->next;
+        c++;
     }
     if (tmp->val > max)
         max = tmp->val;
@@ -358,17 +381,22 @@ int     last(t_stack *a)
     return (tmp->val);
 }
 
-int     is_min(t_stack *a)
+int     is_min(t_stack *a, int *len)
 {
     t_stack *tmp;
-
+    int c;
     int min;
+
+    c = 0;
     min = a->val;
     tmp = a->next;
     while (tmp->next)
     {
         if (tmp->val < min)
+        {
             min = tmp->val;
+            *len = c;
+        }
         tmp = tmp->next;
     }
     if (tmp->val < min)
@@ -382,6 +410,7 @@ t_stack    *sort5(t_stack *a, int *tab, int size)
 {
     t_stack *b;
     t_stack *tmp;
+    int     len;
 
     b = NULL;
     b = ft_push(b, tab[0]);
@@ -389,25 +418,40 @@ t_stack    *sort5(t_stack *a, int *tab, int size)
     printf("pb\npb\n");
     
     a = sort3(tab + 2, 3);
-    
+    len = 0;
     while (b)
     {   
         if (b->val == 4)
         {
-            while (!is_max(a))
+            len = 0;
+            while (!is_max(a, &len))
             {
-                printf("ra\n");
-                a = rotate_ab(a);
+                if (len > 2)
+                {
+                    while (!is_max(a, &len))
+                    {
+                        printf("rra\n");
+                        a = rev_rotate_ab(a);
+                    }
+                }
+                else
+                {
+                    while (!is_max(a, &len))
+                    {
+                        printf("ra\n");
+                        a = rotate_ab(a);
+                    }
+                }
             }
             ft_push_ab(&b, &a);
             printf("pa\n");
         }
-        else if (is_max(a) && b->val > is_max(a))
+        else if (is_max(a, &len) && b->val > is_max(a, &len))
         {
             ft_push_ab(&b, &a);
             printf("pa\n");
         }
-        else if (is_min(a) && b->val < is_min(a))
+        else if (is_min(a, &len) && b->val < is_min(a, &len))
         {
             ft_push_ab(&b, &a);
             printf("pa\n");
@@ -433,6 +477,7 @@ t_stack    *sort5(t_stack *a, int *tab, int size)
         printf("ra\n");
         a = rotate_ab(a);
     }
+    a = rev_rotate_ab(a);
     return (a);
 }
 

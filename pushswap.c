@@ -39,7 +39,6 @@ int     main(int argc, char **argv)
         a = fill(a, tab, size - 1);
         if (!is_sorted(a))
             sort_all(size, a, tab , q);
-        system("leaks push_swap");
     }
     return (0);
 }
